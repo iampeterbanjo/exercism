@@ -14,14 +14,14 @@ type Clock struct {
 
 // New Clock with hour and minute
 func New(hour, minute int) Clock {
-	// fmt.Printf("Passed: hour %d, minute %d \n", hour, minute)
+	fmt.Printf("Passed: hour %d, minute %d \n", hour, minute)
 	t := time.Time{}
 	a := t.Add(time.Duration(hour) * time.Hour)
 	b := a.Add(time.Duration(minute) * time.Hour)
 
 	c := Clock{hour, minute}
 	c.hour, c.minute, _ = b.Clock()
-	// fmt.Printf("Return: c.hour %d, c.minute %d \n", c.hour, c.minute)
+	fmt.Printf("Return: c.hour %d, c.minute %d \n", c.hour, c.minute)
 
 	return c
 }
