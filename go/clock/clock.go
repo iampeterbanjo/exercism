@@ -9,7 +9,7 @@ type Clock struct {
 	hour, minute int
 }
 
-//GetRemainderQuotient is over MINUTES minutes or HOURS hours
+//GetRemainderQuotient is over MaxMinutes minutes or MaxHours hours
 func GetRemainderQuotient(num, divisor int) (remainder int, quotient int) {
 	r := num % divisor
 	q := int(num / divisor)
@@ -25,55 +25,25 @@ func Abs(i int) int {
 	return i
 }
 
-// HOURS in a day
-const HOURS = 24
+// MaxHours in a day
+const MaxHours = 24
 
-// MINUTES in an hour
-const MINUTES = 60
+// MaxMinutes in an hour
+const MaxMinutes = 60
 
 // New Clock with hour and minute
 func New(hour, minute int) Clock {
 
-	if (hour >= 0 && hour < HOURS) && (minute >= 0 && minute < MINUTES) {
+	if (hour >= 0 && hour < MaxHours) && (minute >= 0 && minute < MaxMinutes) {
 		return Clock{hour, minute}
 	}
 
-	hr, min := hour, minute
+	totalMinutes := hour*MaxMinutes + minute
+	min, mq := GetRemainderQuotient(totalMinutes, MaxMinutes)
+	_, hq := GetRemainderQuotient(totalMinutes, MaxHours)
+	hq += mq
 
-	if minute < 0 {
-		remMin, qntMin := GetRemainderQuotient(Abs(minute), MINUTES)
-		min = MINUTES - remMin
-		hr -= 24 - (qntMin + 1)
-	}
-
-	if hour < 0 {
-		remHr, _ := GetRemainderQuotient(Abs(hour), HOURS)
-		hr = HOURS - remHr
-	}
-
-	minRemainder, minQuotient := GetRemainderQuotient(min, MINUTES)
-
-	if minQuotient > 0 {
-		hr += minQuotient
-		min = minRemainder
-	}
-
-	hrRemainder, hrQuotient := GetRemainderQuotient(hr, HOURS)
-
-	if hrQuotient > 0 {
-		hr = hrRemainder
-	}
-
-	if hr == HOURS {
-		hr = 0
-	}
-
-	hr, min = Abs(hr), Abs(min)
-
-	fmt.Printf("Passed: hour %d, minute %d \n", hour, minute)
-	fmt.Printf("Calc: minRemainder %d, minQuotient %d \n", minRemainder, minQuotient)
-	fmt.Printf("Calc: hrRemainder %d, hrQuotient %d \n", hrRemainder, hrQuotient)
-	fmt.Printf("Return: hr %d, min %d \n", hr, min)
+	hr, _ := GetRemainderQuotient(hq, MaxHours)
 
 	return Clock{hr, min}
 }
@@ -87,7 +57,7 @@ func (c Clock) String() string {
 func (c Clock) Add(minutes int) Clock {
 	c.minute += minutes
 
-	rem, qnt := GetRemainderQuotient(c.minute, MINUTES)
+	rem, qnt := GetRemainderQuotient(c.minute, MaxMinutes)
 
 	if qnt > 0 {
 		c.hour += qnt
