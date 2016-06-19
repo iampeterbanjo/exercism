@@ -1,9 +1,6 @@
 package clock
 
-import (
-	"fmt"
-	"time"
-)
+import "fmt"
 
 const testVersion = 4
 
@@ -12,18 +9,73 @@ type Clock struct {
 	hour, minute int
 }
 
+//GetRemainderQuotient is over MINUTES minutes or HOURS hours
+func GetRemainderQuotient(num, divisor int) (remainder int, quotient int) {
+	r := num % divisor
+	q := int(num / divisor)
+
+	return r, q
+}
+
+//Abs ..olute value for int
+func Abs(i int) int {
+	if i < 0 {
+		return -i
+	}
+	return i
+}
+
+// HOURS in a day
+const HOURS = 24
+
+// MINUTES in an hour
+const MINUTES = 60
+
 // New Clock with hour and minute
 func New(hour, minute int) Clock {
+
+	if (hour >= 0 && hour < HOURS) && (minute >= 0 && minute < MINUTES) {
+		return Clock{hour, minute}
+	}
+
+	hr, min := hour, minute
+
+	if minute < 0 {
+		remMin, qntMin := GetRemainderQuotient(Abs(minute), MINUTES)
+		min = MINUTES - remMin
+		hr -= 24 - (qntMin + 1)
+	}
+
+	if hour < 0 {
+		remHr, _ := GetRemainderQuotient(Abs(hour), HOURS)
+		hr = HOURS - remHr
+	}
+
+	minRemainder, minQuotient := GetRemainderQuotient(min, MINUTES)
+
+	if minQuotient > 0 {
+		hr += minQuotient
+		min = minRemainder
+	}
+
+	hrRemainder, hrQuotient := GetRemainderQuotient(hr, HOURS)
+
+	if hrQuotient > 0 {
+		hr = hrRemainder
+	}
+
+	if hr == HOURS {
+		hr = 0
+	}
+
+	hr, min = Abs(hr), Abs(min)
+
 	fmt.Printf("Passed: hour %d, minute %d \n", hour, minute)
-	t := time.Time{}
-	a := t.Add(time.Duration(hour) * time.Hour)
-	b := a.Add(time.Duration(minute) * time.Hour)
+	fmt.Printf("Calc: minRemainder %d, minQuotient %d \n", minRemainder, minQuotient)
+	fmt.Printf("Calc: hrRemainder %d, hrQuotient %d \n", hrRemainder, hrQuotient)
+	fmt.Printf("Return: hr %d, min %d \n", hr, min)
 
-	c := Clock{hour, minute}
-	c.hour, c.minute, _ = b.Clock()
-	fmt.Printf("Return: c.hour %d, c.minute %d \n", c.hour, c.minute)
-
-	return c
+	return Clock{hr, min}
 }
 
 // Clock to string
@@ -33,11 +85,14 @@ func (c Clock) String() string {
 
 // Add minutes to Clock
 func (c Clock) Add(minutes int) Clock {
-	t := time.Time{}
-	x := t.Add(time.Duration(c.hour) * time.Hour)
-	y := x.Add(time.Duration(c.minute) * time.Minute)
-	z := y.Add(time.Duration(minutes) * time.Minute)
+	c.minute += minutes
 
-	c.hour, c.minute, _ = z.Clock()
+	rem, qnt := GetRemainderQuotient(c.minute, MINUTES)
+
+	if qnt > 0 {
+		c.hour += qnt
+		c.minute = rem
+	}
+
 	return c
 }
